@@ -1,0 +1,20 @@
+# -----------------------------------------------------------------------------
+# Configuration for dls-sync-drives.sh
+#
+# Instructions:
+# 1. Copy this file to 'sync.config' in the same directory.
+# 2. Edit the paths below to match your system's configuration.
+# 3. The 'sync.config' file is ignored by git to protect your local settings.
+# -----------------------------------------------------------------------------
+
+# Base path for your iCloud Drive.
+# The default is standard for most macOS users.
+ICLOUD_DIR_BASE="$HOME/Library/Mobile Documents/com~apple~CloudDocs"
+
+# Base path for your Google Drive.
+# IMPORTANT: You MUST replace '[your-email-here]' with your actual
+# Google account email address associated with the Drive folder.
+GOOGLE_DIR_BASE="$HOME/Library/CloudStorage/GoogleDrive-[your-email-here]/My Drive"
+
+# The name of the folder to synchronize between the two locations.
+SYNC_FOLDER_NAME=".DLS" 

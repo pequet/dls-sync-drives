@@ -1,0 +1,11 @@
+DLS Drive Sync
+========================================================================
+- Loading configuration
+- Checking dependencies
+- Validating paths
+iCloud Path: /Users/cavgchagstuejncm/Library/Mobile Documents/com~apple~CloudDocs/.DLS
+Google Drive Path: /Users/cavgchagstuejncm/Library/CloudStorage/GoogleDrive-[your@email]/My Drive/.DLS
+- Pass 1: iCloud → Google Drive
+- Pass 2: Google Drive → iCloud
+🏁 Synchronization completed successfully
+========================================================================
