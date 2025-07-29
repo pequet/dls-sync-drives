@@ -103,6 +103,10 @@ main() {
         
         print_success "Automation agent installed and loaded."
         print_info "The sync will now run automatically."
+        print_info "To monitor its status, you can check the logs:"
+        print_info "  - Script Log: ${LOG_FILE_PATH}"
+        print_info "  - Agent Output: /tmp/${PLIST_NAME}.out"
+        print_info "  - Agent Errors: /tmp/${PLIST_NAME}.err"
         ;;
       * )
         print_info "Skipping installation of the automation agent."

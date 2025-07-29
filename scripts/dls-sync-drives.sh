@@ -22,7 +22,6 @@ set -o pipefail
 #
 # Dependencies:
 #   - rsync: Must be installed and available in the system's PATH.
-#   - flock: Used for lock file mechanism to prevent concurrent runs.
 #
 # Support the Project:
 #   - Buy Me a Coffee: https://buymeacoffee.com/pequet
@@ -39,7 +38,7 @@ done
 SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
 CONFIG_FILE="${SCRIPT_DIR}/sync.config"
-LOCK_FILE="/tmp/dls-sync-drives.lock"
+LOCK_DIR="/tmp/dls-sync-drives.lock.d" # Use a directory for the lock
 LOG_FILE_PATH="${SCRIPT_DIR}/../logs/sync.log"  # Default, can be overridden by config
 
 # Source shared utilities
@@ -79,10 +78,29 @@ check_dependencies() {
         print_error "rsync not found. Install with: brew install rsync"
         exit 1
     fi
-    
-    if ! command -v flock &> /dev/null; then
-        print_error "flock not found. Install with: brew install flock"
+}
+
+# *
+# * Concurrency Lock Management
+# *
+acquire_lock() {
+    # Use mkdir for an atomic, dependency-free lock.
+    if ! mkdir "${LOCK_DIR}" 2>/dev/null; then
+        print_error "Could not acquire lock. Lock directory '${LOCK_DIR}' already exists. Another instance may be running."
         exit 1
+    fi
+    log_message "INFO" "Lock acquired: ${LOCK_DIR}"
+}
+
+cleanup_lock() {
+    # This trap handler ensures the lock directory is removed on script exit.
+    if [ -n "${LOCK_DIR:-}" ] && [ -d "${LOCK_DIR}" ]; then
+        if rmdir "${LOCK_DIR}"; then
+            # Log successful cleanup if logging is still available.
+            log_message "INFO" "Successfully removed lock directory: ${LOCK_DIR}"
+        else
+            log_message "ERROR" "Failed to remove lock directory: ${LOCK_DIR}"
+        fi
     fi
 }
 
@@ -139,19 +157,17 @@ run_sync() {
 # * Main Execution
 # *
 main() {
+    # Ensure the lock is removed on exit
+    trap 'cleanup_lock' EXIT INT TERM
+
     ensure_log_directory
     log_message "INFO" "=== DLS Drive Sync starting ==="
-
-    (
-        if ! flock -n 200; then
-            print_error "Another instance of dls-sync-drives is already running."
-            exit 1
-        fi
-        run_sync
-    ) 200>"${LOCK_FILE}"
+    
+    acquire_lock
+    run_sync
     
     log_message "INFO" "=== DLS Drive Sync finished ==="
 }
 
 # --- Script Entrypoint ---
-main "$@" 
+main "$@"

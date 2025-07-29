@@ -77,13 +77,17 @@ SYNC_FOLDER_NAME=".DLS"
 The installer script will make the main script globally available, create the initial configuration file if needed, and give you the option to set up the `launchd` agent for automatic execution.
 
 1.  **Make the installer executable:**
+
     ```bash
     chmod +x install.sh
     ```
+
 2.  **Run the installer:**
+
     ```bash
     ./install.sh
     ```
+
     The script will guide you through the process, asking for your administrator password to install the script to `/usr/local/bin` and asking if you want to set up the automation agent.
 
 #### Manual Installation
@@ -115,10 +119,13 @@ You can choose either `launchd` (recommended for macOS) or a traditional `cron` 
     *(The provided `.plist` is already configured to use the `/usr/local/bin/dls-sync-drives.sh` path, assuming you completed step 1.)*
 
 2.  **Load the `launchd` agent** to schedule the job:
+
     ```bash
     launchctl load ~/Library/LaunchAgents/com.pequet.dlssyncdrives.plist
     ```
+
     The script will now run automatically every 2 hours. You can trigger the first run immediately with:
+
     ```bash
     launchctl start com.pequet.dlssyncdrives
     ```
@@ -128,14 +135,17 @@ You can choose either `launchd` (recommended for macOS) or a traditional `cron` 
 If you prefer `cron`, you can add a job to your crontab.
 
 1.  **Open your crontab** for editing:
+
     ```bash
     crontab -e
     ```
 
 2.  **Add the cron job.** This example runs the script every 2 hours.
+
     ```bash
     0 */2 * * * /usr/local/bin/dls-sync-drives.sh
     ```
+    
     *(This assumes you have made the script globally available as described above. If not, use the full, absolute path to `scripts/dls-sync-drives.sh`.)*
 
 3.  **Save and exit** the editor. The cron job is now active.
@@ -161,6 +171,11 @@ tail -f logs/sync.log
 - **Permission Problems:**  Ensure the script has execute permissions (`chmod +x scripts/dls-sync-drives.sh`).
 - **Lock File Conflicts:**  If the script fails to start due to a lock file, check `/tmp/dls-sync-drives.lock`.  If the script is not running, you can manually remove the lock file.
 - **Logging:**  Consult the `logs/sync.log` file for detailed information about script execution and any errors encountered.
+- **`launchd` Agent Issues**: If the automated script fails to run, you can troubleshoot it using the following commands:
+    - **Check Status**: `launchctl list | grep com.pequet.dlssyncdrives`. A `1` in the second column indicates the last run exited with an error.
+    - **View Logs**: Check the error logs at `/tmp/com.pequet.dlssyncdrives.err` and output logs at `/tmp/com.pequet.dlssyncdrives.out`.
+    - **Start/Stop Manually**: You can manually run the agent with `launchctl start com.pequet.dlssyncdrives` or stop it with `launchctl stop com.pequet.dlssyncdrives`.
+    - **Reload Agent**: To apply changes to the `.plist` file, you must unload and reload it: `launchctl unload ~/Library/LaunchAgents/com.pequet.dlssyncdrives.plist` followed by `launchctl load ~/Library/LaunchAgents/com.pequet.dlssyncdrives.plist`.
 
 ## License
 
